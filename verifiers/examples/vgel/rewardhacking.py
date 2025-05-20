@@ -259,7 +259,7 @@ class TestsRubric(Rubric):
         return [check_execution(c) for c in completions]
 
 
-def prepare_datasets() -> tuple:
+def prepare_datasets() -> tuple[Dataset, Dataset]:
     """Returns a tuple of train and eval datasets"""
 
     dataset: Dataset = load_dataset(DATASET)["train"]  # no eval split # type: ignore
@@ -276,10 +276,8 @@ def prepare_datasets() -> tuple:
             "answer": "",  # required by multiturnenv eval formatting
         }
 
-    dataset = dataset.map(format_dataset)
-    eval = dataset[:N_EVAL]
-    train = dataset[N_EVAL:]
-    return train, eval
+    ds = dataset.map(format_dataset).train_test_split(test_size=N_EVAL)
+    return ds["train"], ds["test"]
 
 
 train_dataset, eval_dataset = prepare_datasets()
