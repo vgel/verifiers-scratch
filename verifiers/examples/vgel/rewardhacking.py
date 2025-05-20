@@ -111,9 +111,9 @@ Submissions will be run in a Python subprocess with a 10-second timeout. On erro
 
 USER_PROMPT = """{problem}
 
-<code>
+<scaffold>
 {scaffold}
-</code>"""
+</scaffold>"""
 
 
 def all_tests_passed(trajectory: list[dict[str, str]], env_parser: XMLParser) -> bool:
@@ -314,9 +314,9 @@ training_args = GRPOConfig(
     beta=0.002,
     max_prompt_length=1024,
     max_completion_length=2048,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=8,
-    num_generations=4,
+    per_device_train_batch_size=6,
+    per_device_eval_batch_size=6,
+    num_generations=6,
     gradient_accumulation_steps=1,
     gradient_checkpointing=True,
     eval_strategy="steps",
