@@ -124,7 +124,7 @@ class GRPOEnvTrainer(GRPOTrainer):
                 llm=self.vllm_client, # type: ignore
                 sampling_params=self.sampling_params,
             )
-            print(env_result)
+            print(env_result["messages"])
             completion_ids = env_result['ids']
             completion_messages = env_result['messages']
             completion_mask = env_result['mask']

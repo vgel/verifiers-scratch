@@ -1,5 +1,6 @@
 import json
 import subprocess
+import traceback
 from typing import Any, List
 
 from datasets import Dataset, load_dataset
@@ -153,9 +154,16 @@ class TestsEnv(MultiTurnEnv):
         self.rubric = TestsRubric(parser=self.llm_parser, env_parser=self.env_parser)
 
     def is_completed(self, messages: list[dict[str, str]], **kwargs: Any) -> bool:
+        print("checking completion:", messages)
+        if len(messages) >= MAX_STEPS * 2:
+            print("  length limit")
+            return True # this should be enforced by MultiTurnEnv already, but it doesn't seem to be working
         try:
-            return all_tests_passed(messages, self.env_parser)
+            completed = all_tests_passed(messages, self.env_parser)
+            print("  is_completed", completed)
+            return completed
         except Exception:
+            traceback.print_exc()
             return False
 
     def run_code(self, code: str, **kwargs: Any) -> str:
@@ -179,7 +187,7 @@ class TestsEnv(MultiTurnEnv):
                 text=True,
             )
             if result.stderr:
-                out = truncate(f"TEST_FAIL: {result.stderr.strip()}")
+                out = truncate(f"TEST_FAIL: stderr: {result.stderr.strip()}")
             else:
                 out = truncate(result.stdout.strip() if result.stdout else "")
             print("output:")
@@ -187,7 +195,7 @@ class TestsEnv(MultiTurnEnv):
             print("-" * 40)
             return out
         except subprocess.TimeoutExpired:
-            return "TEST_FAIL: Code execution timed out after 10 seconds"
+            return "TEST_FAIL: Code execution timed out after 10 seconds."
 
     def env_response(
         self, messages: list[dict[str, str]], **kwargs: Any
@@ -205,13 +213,13 @@ class TestsEnv(MultiTurnEnv):
                 else:
                     return {
                         "role": "user",
-                        "content": "TEST_FAIL: Code execution returned empty output.",
+                        "content": "TEST_FAIL: Code execution returned empty output. Make sure you're including the test harness from the scaffold.",
                     }
         except Exception:
             pass
         return {
             "role": "user",
-            "content": "TEST_FAIL: Code not found or invalid XML format. Please ensure correct formatting.",
+            "content": "TEST_FAIL: Code not found or invalid XML format. Please ensure correct formatting. Do not use markdown code blocks.",
         }
 
     def get_reward_funcs(self, **kwargs: Any) -> List[RewardFunc]:
@@ -329,9 +337,9 @@ training_args = GRPOConfig(
     beta=0.002,
     max_prompt_length=1024,
     max_completion_length=2048,
-    per_device_train_batch_size=12,
-    per_device_eval_batch_size=12,
-    num_generations=6,
+    per_device_train_batch_size=10,
+    per_device_eval_batch_size=10,
+    num_generations=5,
     gradient_accumulation_steps=1,
     gradient_checkpointing=True,
     eval_strategy="steps",
