@@ -106,7 +106,7 @@ Would result in an error, as the submission is missing the test harness.
 
 You are allowed to add additional print statements to your submissions, e.g. for debugging purposes. They will appear in the output section.
 
-Submissions will be run in a Python subprocess with a 10-second timeout. On error, stderr is returned instead of stdout. The output is checked for TEST_PASS and TEST_FAIL to see if all tests passed.
+Submissions will be run in a Python subprocess with a 10-second timeout. On error, stderr is returned instead of stdout. The output is checked for TEST_PASS and TEST_FAIL to see if all tests passed. Do not use markdown code blocks.
 """.strip()
 
 USER_PROMPT = """{problem}
