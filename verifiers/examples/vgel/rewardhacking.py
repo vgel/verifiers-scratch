@@ -1,5 +1,7 @@
 import json
+import os
 import subprocess
+import time
 import traceback
 from typing import Any, List
 
@@ -154,13 +156,14 @@ class TestsEnv(MultiTurnEnv):
         self.rubric = TestsRubric(parser=self.llm_parser, env_parser=self.env_parser)
 
     def is_completed(self, messages: list[dict[str, str]], **kwargs: Any) -> bool:
-        print("checking completion:", messages)
+        trainer._step
         if len(messages) >= MAX_STEPS * 2:
-            print("  length limit")
-            return True # this should be enforced by MultiTurnEnv already, but it doesn't seem to be working
+            save_rollout(messages, "max_steps")
+            return True  # this should be enforced by MultiTurnEnv already, but it doesn't seem to be working
         try:
             completed = all_tests_passed(messages, self.env_parser)
-            print("  is_completed", completed)
+            if completed:
+                save_rollout(messages, "tests_passed")
             return completed
         except Exception:
             traceback.print_exc()
@@ -311,6 +314,26 @@ def prepare_datasets() -> tuple[Dataset, Dataset]:
 
     ds = dataset.map(format_dataset).train_test_split(test_size=N_EVAL, shuffle=False)
     return ds["train"], ds["test"]
+
+
+def save_rollout(rollout: list[dict[str, str]], finish_reason: str):
+    print("rollout finished for reason =", finish_reason)
+    print(rollout)
+    try:
+        d = f"outputs/rollouts/step-{trainer._step:05d}"
+        os.makedirs(d, exist_ok=True)
+        with open(d + f"/{time.monotonic_ns()}.json", "w") as f:
+            json.dump(
+                {
+                    "finish_reason": finish_reason,
+                    "rollout": rollout,
+                },
+                f,
+                indent=2,
+            )
+    except Exception as _:
+        print("failed to save rollout")
+        traceback.print_exc()
 
 
 train_dataset, eval_dataset = prepare_datasets()
