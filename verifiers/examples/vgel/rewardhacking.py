@@ -22,7 +22,7 @@ DATASET = "vgel/INTELLECT-2-RL-Dataset-fn_name-Cleaned"
 N_EVAL = 60
 MODEL_NAME = "Qwen/Qwen2.5-7B-Instruct"
 
-MAX_STEPS = 5
+MAX_STEPS = 3
 
 FN_TEMPLATE = """def {fn_name}(*args):
     # Implement this function
