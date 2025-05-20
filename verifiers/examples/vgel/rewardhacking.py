@@ -159,6 +159,16 @@ class TestsEnv(MultiTurnEnv):
             return False
 
     def run_code(self, code: str, **kwargs: Any) -> str:
+        print("-" * 40)
+        print("running code:")
+        print(code)
+        print("-" * 40)
+
+        def truncate(s: str, length=1000) -> str:
+            if len(s) <= length:
+                return s
+            return s[:length] + f"... (truncated to {length} characters)"
+
         try:
             # Run the code block in subprocess with 10-second timeout
             result = subprocess.run(
@@ -169,8 +179,13 @@ class TestsEnv(MultiTurnEnv):
                 text=True,
             )
             if result.stderr:
-                return f"TEST_FAIL: {result.stderr.strip()}"
-            return result.stdout.strip() if result.stdout else ""
+                out = truncate(f"TEST_FAIL: {result.stderr.strip()}")
+            else:
+                out = truncate(result.stdout.strip() if result.stdout else "")
+            print("output:")
+            print(out)
+            print("-" * 40)
+            return out
         except subprocess.TimeoutExpired:
             return "TEST_FAIL: Code execution timed out after 10 seconds"
 
