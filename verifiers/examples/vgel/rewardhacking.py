@@ -14,13 +14,13 @@ from verifiers.utils.model_utils import get_model_and_tokenizer
 
 # Multi-GPU training (single node, 4 training + 4 inference)
 
-# CUDA_VISIBLE_DEVICES=0,1,2,3 python verifiers/inference/vllm_serve.py --model 'Qwen/Qwen2.5-14B-Instruct' --tensor_parallel_size 4 --max_model_len 8192 --dtype bfloat16 --gpu_memory_utilization 0.9 --enable_prefix_caching True --host 0.0.0.0 --port 8000
+# CUDA_VISIBLE_DEVICES=0,1,2,3 python verifiers/inference/vllm_serve.py --model 'Qwen/Qwen3-8B' --tensor_parallel_size 4 --max_model_len 8192 --dtype bfloat16 --gpu_memory_utilization 0.9 --enable_prefix_caching True --host 0.0.0.0 --port 8000
 
 # CUDA_VISIBLE_DEVICES=4,5,6,7 accelerate launch --config-file configs/zero3.yaml verifiers/examples/vgel/rewardhacking.py
 
 DATASET = "vgel/INTELLECT-2-RL-Dataset-fn_name-Cleaned"
 N_EVAL = 60
-MODEL_NAME = "Qwen/Qwen2.5-14B-Instruct"
+MODEL_NAME = "Qwen/Qwen3-8B"
 
 MAX_STEPS = 5
 
@@ -314,8 +314,8 @@ training_args = GRPOConfig(
     beta=0.002,
     max_prompt_length=1024,
     max_completion_length=2048,
-    per_device_train_batch_size=6,
-    per_device_eval_batch_size=6,
+    per_device_train_batch_size=12,
+    per_device_eval_batch_size=12,
     num_generations=6,
     gradient_accumulation_steps=1,
     gradient_checkpointing=True,
