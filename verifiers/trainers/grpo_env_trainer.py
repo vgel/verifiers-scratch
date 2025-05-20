@@ -119,12 +119,12 @@ class GRPOEnvTrainer(GRPOTrainer):
         # Gather the original prompts in message dict form, not the text form
         all_prompts = gather_object(prompts)
         if self.accelerator.is_main_process:
+            print("all_prompts", all_prompts)
             env_result = self.env.generate(
                 prompts=all_prompts,
                 llm=self.vllm_client, # type: ignore
                 sampling_params=self.sampling_params,
             )
-            print(env_result["messages"])
             completion_ids = env_result['ids']
             completion_messages = env_result['messages']
             completion_mask = env_result['mask']
