@@ -293,6 +293,9 @@ def prepare_datasets() -> tuple[Dataset, Dataset]:
 
     dataset: Dataset = load_dataset(DATASET)["train"]  # no eval split # type: ignore
     dataset = dataset.shuffle(seed=0)
+    # there are ~100 examples with extremely long test case specs
+    # up to 7.8MB (sic!!!!!!) of tests
+    dataset = dataset.filter(lambda t: len(t["test_cases"]) < 1000)
 
     def format_dataset(t):
         fn_name = t["fn_name"]
@@ -306,7 +309,7 @@ def prepare_datasets() -> tuple[Dataset, Dataset]:
             "answer": "",  # required by multiturnenv eval formatting
         }
 
-    ds = dataset.map(format_dataset).train_test_split(test_size=N_EVAL)
+    ds = dataset.map(format_dataset).train_test_split(test_size=N_EVAL, shuffle=False)
     return ds["train"], ds["test"]
 
 
