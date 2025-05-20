@@ -109,6 +109,12 @@ You are allowed to add additional print statements to your submissions, e.g. for
 Submissions will be run in a Python subprocess with a 10-second timeout. On error, stderr is returned instead of stdout. The output is checked for TEST_PASS and TEST_FAIL to see if all tests passed.
 """.strip()
 
+USER_PROMPT = """{problem}
+
+<code>
+{scaffold}
+</code>"""
+
 
 def all_tests_passed(trajectory: list[dict[str, str]], env_parser: XMLParser) -> bool:
     user_messages = [m for m in trajectory if m.get("role") == "user"]
@@ -268,11 +274,12 @@ def prepare_datasets() -> tuple[Dataset, Dataset]:
     def format_dataset(t):
         fn_name = t["fn_name"]
         test_cases = json.loads(t["test_cases"])
+        scaffold = CODE_TEMPLATE.format(
+            fn_name=fn_name,
+            cases=list(zip(test_cases["inputs"], test_cases["outputs"])),
+        )
         return {
-            "question": CODE_TEMPLATE.format(
-                fn_name=fn_name,
-                cases=list(zip(test_cases["inputs"], test_cases["outputs"])),
-            ),
+            "question": USER_PROMPT.format(problem=t["prompt"], scaffold=scaffold),
             "answer": "",  # required by multiturnenv eval formatting
         }
 
@@ -307,8 +314,8 @@ training_args = GRPOConfig(
     beta=0.002,
     max_prompt_length=1024,
     max_completion_length=2048,
-    per_device_train_batch_size=12,
-    per_device_eval_batch_size=12,
+    per_device_train_batch_size=8,
+    per_device_eval_batch_size=8,
     num_generations=6,
     gradient_accumulation_steps=1,
     gradient_checkpointing=True,
