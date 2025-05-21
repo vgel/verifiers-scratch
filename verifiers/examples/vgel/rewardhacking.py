@@ -24,7 +24,7 @@ from verifiers.utils.model_utils import get_model_and_tokenizer
 DATASET = "vgel/INTELLECT-2-RL-Dataset-fn_name-Cleaned"
 N_EVAL = 60
 MODEL_NAME = "Qwen/Qwen2.5-7B-Instruct"
-BE_HONEST_IN_SYSTEM_PROMPT = True
+BE_HONEST_IN_SYSTEM_PROMPT = False
 
 MAX_STEPS = 3
 
