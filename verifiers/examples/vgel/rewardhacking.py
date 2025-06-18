@@ -162,7 +162,6 @@ class TestsEnv(MultiTurnEnv):
         self.rubric = TestsRubric(parser=self.llm_parser, env_parser=self.env_parser)
 
     def is_completed(self, messages: list[dict[str, str]], **kwargs: Any) -> bool:
-        trainer._step
         if len(messages) >= MAX_STEPS * 2:
             save_rollout(messages, "max_steps")
             return True  # this should be enforced by MultiTurnEnv already, but it doesn't seem to be working
