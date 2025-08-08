@@ -5,10 +5,13 @@ from openai import OpenAI
 
 import verifiers as vf
 
-def make_split(text: str) -> dict[str, str]:
+def make_cut(text: str) -> dict[str, str]:
+    """Makes a random cut somewhere in the paragraph, using the text hash for consistency."""
     n_spaces = text.count(" ")
-    split_space = min(n_spaces - 25, max(25, hash(text) % n_spaces))
-    idx = 0
+    import random
+    split_space = random.randint(0, n_spaces) # TODO: # hash(text) % n_spaces
+    split_space = min(n_spaces - 25, max(25, split_space))
+    idx = -1
     for _ in range(split_space):
         idx = text.find(" ", idx + 1)
     return { "prompt": text[:idx], "answer": text[idx:] }
@@ -24,23 +27,21 @@ def load_environment(
 ) -> vf.Environment:
     dataset = load_dataset(dataset_name, split=dataset_split)
     dataset = dataset.filter(lambda x: x[dataset_key].count(" ") > 50)
-    dataset = dataset.map(lambda x: make_split(x[dataset_key]))
+    dataset = dataset.map(lambda x: make_cut(x[dataset_key]))
 
     judge_client = OpenAI(api_key=os.getenv(judge_api_key_var), base_url=judge_base_url)
-
-    # Create a comprehensive evaluation prompt
     judge_prompt = """Evaluate this base model contination from a prefix, compared to the true continuation from Wikipedia.
 
 <prefix>
-{prefix}
+{question}
 </prefix>
 
 <true_continuation>
-{true_continuation}
+{answer}
 </prefix>
 
 <model_continuation>
-{model_continuation}
+{response}
 </model_continuation>
 
 Provide a letter grade from A-F where:
@@ -49,9 +50,7 @@ Provide a letter grade from A-F where:
 - D-F: Incoherent text, sampling errors, repetition / looping
 
 Respond with the letter grade in <grade> ... </grade> tags."""
-
     judge_parser = vf.XMLParser(fields=[], answer_field="grade")
-
     rubric = vf.JudgeRubric(
         judge_client=judge_client,
         judge_model=judge_model,
