@@ -10,7 +10,7 @@ def make_split(text: str) -> dict[str, str]:
     split_space = min(n_spaces - 25, max(25, hash(text) % n_spaces))
     idx = 0
     for _ in range(split_space):
-        idx = text.find(" ", idx)
+        idx = text.find(" ", idx + 1)
     return { "prompt": text[:idx], "answer": text[idx:] }
 
 
