@@ -55,18 +55,17 @@ Provide a letter grade from A-F where:
 - D-F: Incoherent text, sampling errors, repetition / looping
 
 Respond with the letter grade in <grade> ... </grade> tags."""
-    judge_parser = vf.XMLParser(fields=["grade"], answer_field="grade")
     rubric = vf.JudgeRubric(
         judge_client=judge_client,
         judge_model=judge_model,
         judge_prompt=judge_prompt,
-        parser=judge_parser,
     )
 
+    grade_parser = vf.XMLParser(fields=["grade"], answer_field="grade")
     def grade_reward(prompt, completion, answer, state, **kwargs) -> float:
         judge_response = rubric.judge(prompt, completion, answer, state, **kwargs)
         judge_grade = (
-            (judge_parser.parse_answer(judge_response) or "F")
+            (grade_parser.parse_answer(judge_response) or "F")
             .strip()
             .replace("+", "")
             .replace("-", "")
