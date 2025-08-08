@@ -13,11 +13,11 @@ CUDA_VISIBLE_DEVICES=0 vf-vllm --model Qwen/Qwen2.5-7B \
 
 training:
 CUDA_VISIBLE_DEVICES=1 accelerate launch --num-processes 1 \
-    --config-file configs/zero3.yaml examples/grpo/train_self_reward.py
+    --config-file configs/zero3.yaml examples/grpo/train_continuation_quality.py
 """
 
 model_name = "Qwen/Qwen2.5-7B"
-vf_env = vf.load_environment(env_id="vf-continuation-quality", model_name=model_name)
+vf_env = vf.load_environment(env_id="vf-continuation-quality")
 model, tokenizer = vf.get_model_and_tokenizer(model_name)
 trainer = vf.GRPOTrainer(
     env=vf_env,
