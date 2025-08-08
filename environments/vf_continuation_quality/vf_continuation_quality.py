@@ -1,15 +1,18 @@
 import os
+import random
 
 from datasets import load_dataset
 from openai import OpenAI
 
 import verifiers as vf
 
+_rand = random.Random(777)
 def make_cut(text: str) -> dict[str, str]:
-    """Makes a random cut somewhere in the paragraph, using the text hash for consistency."""
+    """Makes a random cut somewhere in the paragraph"""
     n_spaces = text.count(" ")
-    import random
-    split_space = random.randint(0, n_spaces) # TODO: # hash(text) % n_spaces
+    # mostly split near the middle
+    split_space = int(_rand.normalvariate(0.5, 0.15) * n_spaces)
+    # make sure there's at least ~25 words before and after the split point
     split_space = min(n_spaces - 25, max(25, split_space))
     idx = -1
     for _ in range(split_space):
@@ -26,8 +29,10 @@ def load_environment(
     judge_api_key_var: str = "OPENAI_API_KEY",
 ) -> vf.Environment:
     dataset = load_dataset(dataset_name, split=dataset_split)
-    dataset = dataset.filter(lambda x: x[dataset_key].count(" ") > 50)
+    # only accept examples with >~100 words or so
+    dataset = dataset.filter(lambda x: x[dataset_key].count(" ") > 100)
     dataset = dataset.map(lambda x: make_cut(x[dataset_key]))
+    dataset = dataset.shuffle(seed=777)
 
     judge_client = OpenAI(api_key=os.getenv(judge_api_key_var), base_url=judge_base_url)
     judge_prompt = """Evaluate this base model contination from a prefix, compared to the true continuation from Wikipedia.
