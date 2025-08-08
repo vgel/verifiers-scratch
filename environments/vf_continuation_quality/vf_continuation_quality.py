@@ -56,7 +56,7 @@ Provide a letter grade from A-F where:
 - D: Inclusions of awkward or glitchy text along with promising prose, some coherent sentences
 - F: Incoherent text
 
-Respond with the letter grade in <grade> ... </grade> tags."""
+Think aloud in a <scratchpad> for a few lines, then respond with the letter grade in <grade> ... </grade> tags."""
     rubric = vf.JudgeRubric(
         judge_client=judge_client,
         judge_model=judge_model,
