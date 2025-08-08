@@ -5,6 +5,14 @@ from openai import OpenAI
 
 import verifiers as vf
 
+def make_split(text: str) -> dict[str, str]:
+    n_spaces = text.count(" ")
+    split_space = min(n_spaces - 25, max(25, hash(text) % n_spaces))
+    idx = 0
+    for _ in range(split_space):
+        idx = text.find(" ", idx)
+    return { "prompt": text[:idx], "answer": text[idx:] }
+
 
 def load_environment(
     dataset_name: str = "agentlans/wikipedia-paragraphs",
@@ -15,9 +23,8 @@ def load_environment(
     judge_api_key_var: str = "OPENAI_API_KEY",
 ) -> vf.Environment:
     dataset = load_dataset(dataset_name, split=dataset_split)
-    dataset = dataset.map(
-        lambda x: {"question": x[dataset_key], "answer": x[dataset_key]}
-    )
+    dataset = dataset.filter(lambda x: x[dataset_key].count(" ") > 50)
+    dataset = dataset.map(lambda x: make_split(x[dataset_key]))
 
     judge_client = OpenAI(api_key=os.getenv(judge_api_key_var), base_url=judge_base_url)
 
