@@ -43,16 +43,18 @@ def load_environment(
 
 <true_continuation>
 {answer}
-</prefix>
+</true_continuation>
 
 <model_continuation>
 {response}
 </model_continuation>
 
 Provide a letter grade from A-F where:
-- A: Smooth prose, facts are accurate w.r.t the true continuation, uses Wikipedia formatting
-- B-C: Awkward writing, incorrect facts / dates / names, incorrect formatting
-- D-F: Incoherent text, sampling errors, repetition / looping
+- A: Smooth prose, facts are mostly accurate w.r.t the true continuation
+- B: Smooth prose, regardless of factual accuracy
+- C: Some awkward wording, spacing, or punctuation
+- D: Inclusions of awkward or glitchy text along with promising prose, some coherent sentences
+- F: Incoherent text
 
 Respond with the letter grade in <grade> ... </grade> tags."""
     rubric = vf.JudgeRubric(
