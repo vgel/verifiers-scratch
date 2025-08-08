@@ -86,4 +86,7 @@ Respond with the letter grade in <grade> ... </grade> tags."""
         dataset=dataset,
         parser=vf.Parser(),
         rubric=rubric,
+        sampling_args={
+            "stop": ["\n"],
+        }
     )
