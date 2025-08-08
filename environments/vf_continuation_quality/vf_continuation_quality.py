@@ -55,7 +55,7 @@ Provide a letter grade from A-F where:
 - D-F: Incoherent text, sampling errors, repetition / looping
 
 Respond with the letter grade in <grade> ... </grade> tags."""
-    judge_parser = vf.XMLParser(fields=[], answer_field="grade")
+    judge_parser = vf.XMLParser(fields=["grade"], answer_field="grade")
     rubric = vf.JudgeRubric(
         judge_client=judge_client,
         judge_model=judge_model,
